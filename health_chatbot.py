@@ -1,7 +1,7 @@
 import urllib.request
 import json
 
-API_KEY = "AIzaSyBi_7aQxZ1HCaQ6umGOmyEwKHkudWhQjps"
+API_KEY = "API_KEY_HERE"
 
 def ask_health_question(question):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
