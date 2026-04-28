@@ -1,67 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Assistant Bot</title>
+    <title>Health Bot - Medicine Search</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        #chat-container { width: 400px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; }
-        #chat-header { background: #007bff; color: white; padding: 15px; text-align: center; font-weight: bold; }
-        #chat-box { height: 400px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .message { padding: 10px; border-radius: 8px; max-width: 80%; line-height: 1.4; font-size: 14px; }
-        .user-msg { background: #007bff; color: white; align-self: flex-end; }
-        .bot-msg { background: #e9ecef; color: #333; align-self: flex-start; }
-        #input-area { display: flex; border-top: 1px solid #ddd; }
-        #user-input { flex: 1; border: none; padding: 15px; outline: none; }
-        #send-btn { background: #007bff; color: white; border: none; padding: 0 20px; cursor: pointer; }
+        body { font-family: Arial, sans-serif; margin: 50px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px #ccc; }
+        input { width: 80%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; border-bottom: 1px solid #eee; }
+        .price { color: #d9534f; font-weight: bold; }
     </style>
 </head>
 <body>
-
-<div id="chat-container">
-    <div id="chat-header">Medical AI Assistant</div>
-    <div id="chat-box">
-        <div class="message bot-msg">Hello! Ask me about any medicine from our database.</div>
+    <div class="container">
+        <h2>Health Bot Medicine Search</h2>
+        <input type="text" id="medName" placeholder="Enter medicine name (e.g. Napa)">
+        <button onclick="searchMed()">Search</button>
+        <div id="resultsList"></div>
     </div>
-    <div id="input-area">
-        <input type="text" id="user-input" placeholder="Type medicine name (e.g. Napa)...">
-        <button id="send-btn">Send</button>
-    </div>
-</div>
 
-<script>
-    const sendBtn = document.getElementById('send-btn');
-    const userInput = document.getElementById('user-input');
-    const chatBox = document.getElementById('chat-box');
-
-    async function sendMessage() {
-        const question = userInput.value;
-        if (!question) return;
-
-        // Add User Message to UI
-        chatBox.innerHTML += `<div class="message user-msg">${question}</div>`;
-        userInput.value = '';
-
-        try {
-            const response = await fetch('http://127.0.0.1:5000/chatbot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: question })
-            });
+    <script>
+        async function searchMed() {
+            const name = document.getElementById('medName').value;
+            const response = await fetch(`/search?name=${name}`);
             const data = await response.json();
             
-            // Add Bot Message to UI
-            chatBox.innerHTML += `<div class="message bot-msg">${data.answer}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        } catch (error) {
-            chatBox.innerHTML += `<div class="message bot-msg" style="color:red">Error: Ensure Python server is running!</div>`;
+            let html = '';
+            data.forEach(med => {
+                html += `
+                    <div class="result">
+                        <strong>${med.name}</strong> (${med.generic_name})<br>
+                        Company: ${med.company} | <span class="price">Price: ${med.price_bdt} BDT</span><br>
+                        <small>Dosage: ${med.dosage}</small>
+                    </div>`;
+            });
+            document.getElementById('resultsList').innerHTML = html || '<p>No medicine found.</p>';
         }
-    }
-
-    sendBtn.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-</script>
-
+    </script>
 </body>
 </html>
